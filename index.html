@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="IT Operations Dashboard — ticket and asset management for IT teams. Built by Zohaib Yousaf." />
+  <title>IT Operations Dashboard — Zohaib Yousaf</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <div class="layout">
+    <!-- ================= Sidebar ================= -->
+    <aside class="sidebar" aria-label="Primary">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">IT</div>
+        <div>
+          <strong>IT Operations</strong>
+          <span>Dashboard</span>
+        </div>
+      </div>
+
+      <nav aria-label="Sections">
+        <button class="nav-item is-active" data-view="dashboard" aria-current="page">
+          <span aria-hidden="true">▦</span> Dashboard
+        </button>
+        <button class="nav-item" data-view="tickets">
+          <span aria-hidden="true">🎫</span> Tickets <span class="nav-badge" id="navTicketCount">0</span>
+        </button>
+        <button class="nav-item" data-view="assets">
+          <span aria-hidden="true">💻</span> Assets <span class="nav-badge" id="navAssetCount">0</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-card">
+        <h2>Operations focus</h2>
+        <p>Endpoint compliance, Microsoft 365 &amp; Azure administration, and day-to-day IT support — managed from one place.</p>
+      </div>
+
+      <footer class="sidebar-footer">
+        <strong>Zohaib Yousaf</strong>
+        <span>IT Manager · Islamabad, Pakistan</span>
+        <a href="mailto:info@zohaibyousaf.com">info@zohaibyousaf.com</a>
+        <a href="https://zohaibyousaf.com" target="_blank" rel="noopener">zohaibyousaf.com</a>
+        <a href="https://linkedin.com/in/zohaibyousaf" target="_blank" rel="noopener">LinkedIn</a>
+      </footer>
+    </aside>
+
+    <!-- ================= Main ================= -->
+    <main class="main" id="main" tabindex="-1">
+      <header class="topbar">
+        <div>
+          <h1 id="viewTitle">Dashboard overview</h1>
+          <p id="viewSubtitle">Live operational picture — tickets, assets and compliance.</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-secondary" id="resetDataBtn" type="button">Reset demo data</button>
+          <button class="btn btn-primary" id="quickAddBtn" type="button">+ New ticket</button>
+        </div>
+      </header>
+
+      <!-- ---------- Dashboard view ---------- -->
+      <section id="view-dashboard" class="view" aria-labelledby="viewTitle">
+        <div class="kpi-grid" role="list" aria-label="Key performance indicators">
+          <article class="kpi-card" role="listitem">
+            <span class="kpi-label">Open tickets</span>
+            <strong class="kpi-value" id="kpiOpenTickets">—</strong>
+            <span class="kpi-note" id="kpiOpenNote">—</span>
+          </article>
+          <article class="kpi-card" role="listitem">
+            <span class="kpi-label">Total assets</span>
+            <strong class="kpi-value" id="kpiAssets">—</strong>
+            <span class="kpi-note" id="kpiAssetsNote">—</span>
+          </article>
+          <article class="kpi-card" role="listitem">
+            <span class="kpi-label">Device compliance</span>
+            <strong class="kpi-value" id="kpiCompliance">—</strong>
+            <span class="kpi-note">Assets marked compliant in Intune-style checks</span>
+          </article>
+          <article class="kpi-card" role="listitem">
+            <span class="kpi-label">Avg. resolution time</span>
+            <strong class="kpi-value" id="kpiResolution">—</strong>
+            <span class="kpi-note">Across resolved tickets in this workspace</span>
+          </article>
+        </div>
+
+        <div class="grid-2">
+          <article class="panel">
+            <div class="panel-head">
+              <h2>Tickets by status</h2>
+              <span class="panel-tag">Canvas chart · no libraries</span>
+            </div>
+            <canvas id="statusChart" width="520" height="280" role="img"
+              aria-label="Bar chart showing the number of tickets in each status"></canvas>
+            <ul class="legend" id="statusLegend" aria-label="Tickets by status legend"></ul>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <h2>Tickets by priority</h2>
+              <span class="panel-tag">Canvas chart · no libraries</span>
+            </div>
+            <canvas id="priorityChart" width="520" height="280" role="img"
+              aria-label="Bar chart showing the number of tickets at each priority"></canvas>
+            <ul class="legend" id="priorityLegend" aria-label="Tickets by priority legend"></ul>
+          </article>
+        </div>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Recent tickets</h2>
+            <button class="btn btn-ghost" data-goto="tickets" type="button">View all tickets →</button>
+          </div>
+          <div class="table-wrap">
+            <table class="table" aria-label="Recent tickets">
+              <thead><tr><th scope="col">ID</th><th scope="col">Title</th><th scope="col">Status</th><th scope="col">Priority</th><th scope="col">Assignee</th></tr></thead>
+              <tbody id="recentTicketsBody"></tbody>
+            </table>
+          </div>
+          <p class="empty-state" id="recentEmpty" hidden>No tickets yet. Create your first ticket to get started.</p>
+        </article>
+      </section>
+
+      <!-- ---------- Tickets view ---------- -->
+      <section id="view-tickets" class="view" hidden aria-labelledby="viewTitle">
+        <div class="toolbar" role="search">
+          <label class="field-inline">
+            <span class="sr-only">Search tickets</span>
+            <input type="search" id="ticketSearch" placeholder="Search title, requester or assignee…" autocomplete="off" />
+          </label>
+          <label class="field-inline">
+            <span class="sr-only">Filter tickets by status</span>
+            <select id="ticketStatusFilter">
+              <option value="">All statuses</option>
+              <option>Open</option><option>In Progress</option><option>Resolved</option><option>Closed</option>
+            </select>
+          </label>
+          <label class="field-inline">
+            <span class="sr-only">Filter tickets by priority</span>
+            <select id="ticketPriorityFilter">
+              <option value="">All priorities</option>
+              <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" id="addTicketBtn" type="button">+ New ticket</button>
+        </div>
+
+        <div class="table-wrap panel">
+          <table class="table" aria-label="Support tickets">
+            <thead><tr>
+              <th scope="col">ID</th><th scope="col">Title</th><th scope="col">Requester</th>
+              <th scope="col">Assignee</th><th scope="col">Status</th><th scope="col">Priority</th>
+              <th scope="col">Created</th><th scope="col">Resolution (h)</th><th scope="col">Actions</th>
+            </tr></thead>
+            <tbody id="ticketsBody"></tbody>
+          </table>
+          <p class="empty-state" id="ticketsEmpty" hidden>No tickets match your filters.</p>
+        </div>
+      </section>
+
+      <!-- ---------- Assets view ---------- -->
+      <section id="view-assets" class="view" hidden aria-labelledby="viewTitle">
+        <div class="toolbar" role="search">
+          <label class="field-inline">
+            <span class="sr-only">Search assets</span>
+            <input type="search" id="assetSearch" placeholder="Search device, type or assigned user…" autocomplete="off" />
+          </label>
+          <label class="field-inline">
+            <span class="sr-only">Filter assets by status</span>
+            <select id="assetStatusFilter">
+              <option value="">All statuses</option>
+              <option>In Use</option><option>In Stock</option><option>In Repair</option><option>Retired</option>
+            </select>
+          </label>
+          <label class="field-inline">
+            <span class="sr-only">Filter assets by compliance</span>
+            <select id="assetComplianceFilter">
+              <option value="">Any compliance</option>
+              <option>Compliant</option><option>Non-compliant</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" id="addAssetBtn" type="button">+ New asset</button>
+        </div>
+
+        <div class="table-wrap panel">
+          <table class="table" aria-label="IT assets">
+            <thead><tr>
+              <th scope="col">Asset tag</th><th scope="col">Device</th><th scope="col">Type</th>
+              <th scope="col">Assigned to</th><th scope="col">Status</th><th scope="col">Compliance</th><th scope="col">Actions</th>
+            </tr></thead>
+            <tbody id="assetsBody"></tbody>
+          </table>
+          <p class="empty-state" id="assetsEmpty" hidden>No assets match your filters.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ================= Ticket dialog ================= -->
+  <dialog id="ticketDialog" aria-labelledby="ticketDialogTitle">
+    <form id="ticketForm" method="dialog" novalidate>
+      <h2 id="ticketDialogTitle">New ticket</h2>
+      <input type="hidden" id="ticketId" />
+      <label>Title <input id="ticketTitle" required maxlength="120" /></label>
+      <label>Description <textarea id="ticketDescription" rows="3" maxlength="600" placeholder="What is the issue or request?"></textarea></label>
+      <div class="form-grid">
+        <label>Requester <input id="ticketRequester" required maxlength="60" /></label>
+        <label>Assignee <input id="ticketAssignee" required maxlength="60" /></label>
+        <label>Status
+          <select id="ticketStatus"><option>Open</option><option>In Progress</option><option>Resolved</option><option>Closed</option></select>
+        </label>
+        <label>Priority
+          <select id="ticketPriority"><option>Critical</option><option>High</option><option selected>Medium</option><option>Low</option></select>
+        </label>
+        <label>Resolution time (hours, if resolved)
+          <input id="ticketResolution" type="number" min="0" step="0.5" placeholder="e.g. 4" />
+        </label>
+      </div>
+      <p class="form-error" id="ticketError" role="alert" hidden>Please fill in title, requester and assignee.</p>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" type="button" data-close-dialog>Cancel</button>
+        <button class="btn btn-primary" type="submit">Save ticket</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ================= Asset dialog ================= -->
+  <dialog id="assetDialog" aria-labelledby="assetDialogTitle">
+    <form id="assetForm" method="dialog" novalidate>
+      <h2 id="assetDialogTitle">New asset</h2>
+      <input type="hidden" id="assetId" />
+      <div class="form-grid">
+        <label>Asset tag <input id="assetTag" required maxlength="30" placeholder="e.g. LT-1042" /></label>
+        <label>Device name <input id="assetDevice" required maxlength="80" placeholder="e.g. Dell Latitude 5440" /></label>
+        <label>Type
+          <select id="assetType"><option>Laptop</option><option>Desktop</option><option>Monitor</option><option>Phone</option><option>Tablet</option><option>Printer</option><option>Network</option><option>Other</option></select>
+        </label>
+        <label>Assigned to <input id="assetAssigned" maxlength="60" placeholder="Unassigned" /></label>
+        <label>Status
+          <select id="assetStatus"><option>In Use</option><option>In Stock</option><option>In Repair</option><option>Retired</option></select>
+        </label>
+        <label>Compliance
+          <select id="assetCompliance"><option>Compliant</option><option>Non-compliant</option></select>
+        </label>
+      </div>
+      <p class="form-error" id="assetError" role="alert" hidden>Please fill in asset tag and device name.</p>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" type="button" data-close-dialog>Cancel</button>
+        <button class="btn btn-primary" type="submit">Save asset</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
