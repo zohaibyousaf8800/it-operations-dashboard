@@ -1,6 +1,7 @@
 # IT Operations Dashboard
 
 ![IT Operations Dashboard — project thumbnail](thumbnail.png)
+**Live demo:** https://zohaibyousaf8800.github.io/it-operations-dashboard/
 
 A dependency-free web app for day-to-day IT operations: support-ticket management, device asset inventory, compliance tracking and operational KPIs — built with pure HTML, CSS and JavaScript. No build step, no frameworks, no CDN libraries. Open `index.html` and it works.
 
